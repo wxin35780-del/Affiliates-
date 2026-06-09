@@ -93,7 +93,7 @@ app.post('/api/run-step', async (req, res) => {
 const distDir = path.join(ROOT, 'dist');
 if (fs.existsSync(distDir)) {
   app.use(express.static(distDir));
-  app.get('*', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
+  app.use((_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 }
 
 app.listen(PORT, () => {
