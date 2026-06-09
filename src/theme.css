@@ -1,0 +1,112 @@
+/* ====== ยุทธภพ · Jianghu Agent OS — design tokens ====== */
+@import url('https://fonts.googleapis.com/css2?family=Trirong:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+TC:wght@500;700;900&family=Ma+Shan+Zheng&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ink + paper */
+  --ink:        #15110b;
+  --ink-1:      #1b160e;
+  --ink-2:      #221b11;
+  --ink-3:      #2c2417;
+  --ink-line:   #3a301d;
+  --ink-haze:   #0e0b07;
+
+  --paper:      #ece2c9;
+  --paper-2:    #ddd0ad;
+  --paper-3:    #cdbd93;
+  --paper-edge: #b9a778;
+
+  /* metals + seal */
+  --gold:       #c8a24a;
+  --gold-hi:    #e6c878;
+  --gold-deep:  #9a7a30;
+  --cinnabar:   #b23b2e;
+  --cinnabar-hi:#d05544;
+
+  /* status hues (shared chroma, warm) */
+  --st-active:  #6f9b6a;  /* ออกศึก */
+  --st-queued:  #c9a24a;  /* รอคำสั่ง */
+  --st-idle:    #7d735c;  /* พักฌาน */
+  --st-rest:    #b6584a;  /* พักฟื้น */
+
+  /* text on ink */
+  --tx:         #ece2c9;
+  --tx-dim:     #a89a78;
+  --tx-faint:   #7a6f55;
+
+  /* text on paper */
+  --tx-ink:     #2a2114;
+  --tx-ink-dim: #6a5a3c;
+
+  --font-display: 'Trirong', serif;
+  --font-cjk:     'Noto Serif TC', serif;
+  --font-brush:   'Ma Shan Zheng', cursive;
+  --font-body:    'IBM Plex Sans Thai', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #0e0b07;
+}
+#root { height: 100vh; }
+
+/* everything scoped under .jh so it never touches other elements */
+.jh { font-family: var(--font-body); color: var(--tx); -webkit-font-smoothing: antialiased; line-height: 1.45; }
+.jh *, .jh *::before, .jh *::after { box-sizing: border-box; }
+.jh h1, .jh h2, .jh h3, .jh h4 { margin: 0; font-weight: 600; }
+.jh p { margin: 0; }
+
+/* paper / ink surfaces */
+.jh-paper {
+  background:
+    radial-gradient(120% 120% at 80% 0%, rgba(255,255,255,.18), transparent 55%),
+    repeating-linear-gradient(94deg, rgba(120,95,50,.035) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+}
+.jh-ink {
+  background:
+    radial-gradient(140% 100% at 50% -10%, #221a10 0%, transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255,220,150,.012) 0 3px, transparent 3px 6px),
+    var(--ink);
+}
+
+/* hairline gold rule */
+.jh-rule { height:1px; background:linear-gradient(90deg, transparent, var(--gold-deep), transparent); }
+
+/* gold double-frame */
+.jh-frame { position:relative; }
+.jh-frame::before {
+  content:''; position:absolute; inset:6px; border:1px solid var(--gold-deep);
+  pointer-events:none; opacity:.55;
+}
+
+/* CJK caption helper */
+.jh-cjk  { font-family: var(--font-cjk); }
+.jh-brush{ font-family: var(--font-brush); }
+.jh-mono { font-family: var(--font-mono); }
+.jh-disp { font-family: var(--font-display); }
+
+/* vertical CJK label */
+.jh-vert { writing-mode: vertical-rl; text-orientation: upright; letter-spacing:.18em; }
+
+/* small caps technical tag */
+.jh-tag {
+  font-family: var(--font-mono); font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color: var(--tx-faint);
+}
+
+/* pulsing status ring */
+@keyframes jh-ping { 0%{transform:scale(1);opacity:.7} 70%,100%{transform:scale(2.6);opacity:0} }
+.jh-pulse { animation: jh-ping 1.8s cubic-bezier(0,0,.2,1) infinite; }
+
+/* scrollable inner regions */
+.jh-scroll::-webkit-scrollbar { width:0; height:0; }
+
+/* nav hover */
+.nav-item { transition: background .14s, color .14s; }
+.nav-item:hover { background: rgba(200,162,74,.08); }
+
+/* main scrollbar */
+.jh-main::-webkit-scrollbar { width: 10px; }
+.jh-main::-webkit-scrollbar-thumb { background: #2c2417; border-radius: 9px; border: 2px solid #0e0b07; }
