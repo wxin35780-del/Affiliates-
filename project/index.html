@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ยุทธภพ · AI Agent Orchestration</title>
+<link rel="stylesheet" href="theme.css" />
+<style>
+  html,body{ margin:0; background:#0e0b07; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="screen-roster.jsx"></script>
+<script type="text/babel" src="screen-roster-mix.jsx"></script>
+<script type="text/babel" src="screen-dashboard.jsx"></script>
+<script type="text/babel" src="screen-profile.jsx"></script>
+<script type="text/babel" src="screen-skill.jsx"></script>
+<script type="text/babel" src="screen-memory.jsx"></script>
+<script type="text/babel" src="screen-task.jsx"></script>
+<script type="text/babel" src="screen-mobile.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+function App(){
+  return (
+    <DesignCanvas>
+      <DCSection id="roster" title="หน้ารวม Agent · การ์ด" subtitle="แนวผสม (1+3) + 3 แนวตั้งต้น">
+        <DCArtboard id="rmix" label="★ แนวผสม 1+3 · โรงเลือกจอมยุทธ (กดสลับได้)" width={1280} height={1004}><RosterMix/></DCArtboard>
+        <DCArtboard id="r1" label="แนว 1 · ทำเนียบกรอบทอง" width={1280} height={880}><RosterV1/></DCArtboard>
+        <DCArtboard id="r2" label="แนว 2 · ป้ายหมายหัวแขวนม้วน" width={1280} height={880}><RosterV2/></DCArtboard>
+        <DCArtboard id="r3" label="แนว 3 · โรงเลือกตัวละคร" width={1280} height={760}><RosterV3/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="dashboard" title="Dashboard · ภาพรวมการทำงาน" subtitle="ศาลบัญชาการทัพ">
+        <DCArtboard id="dash" label="แดชบอร์ดแม่ทัพ" width={1280} height={860}><Dashboard/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="profile" title="โปรไฟล์ Agent" subtitle="สำนวนประจำตัวจอมยุทธ">
+        <DCArtboard id="prof" label="โปรไฟล์ · จิตรกรเงามายา" width={1280} height={900}><Profile/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="skill" title="หน้า Skill · วิชา/กระบวนท่า" subtitle="ตำราวิทยายุทธ">
+        <DCArtboard id="sk" label="วิชาประจำตัว" width={1280} height={820}><SkillPage/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="memory" title="หน้า Memory · คลังคัมภีร์" subtitle="ความทรงจำระยะสั้น/ยาว">
+        <DCArtboard id="mem" label="คลังคัมภีร์" width={1280} height={820}><MemoryPage/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="task" title="หน้า Task · ภารกิจ" subtitle="เส้นเวลาการประสานทัพ">
+        <DCArtboard id="tk" label="เส้นเวลาภารกิจ" width={1280} height={820}><TaskPage/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="mobile" title="เวอร์ชันมือถือ" subtitle="รวม Agent + โปรไฟล์">
+        <DCArtboard id="m1" label="มือถือ · รวม Agent" width={390} height={844}><MobileRoster/></DCArtboard>
+        <DCArtboard id="m2" label="มือถือ · โปรไฟล์" width={390} height={844}><MobileProfile/></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+// mount เมื่อสคริปต์ babel ทุกไฟล์โหลดครบ
+function boot(){
+  if(!window.RosterMix || !window.RosterV1 || !window.Dashboard || !window.Profile || !window.SkillPage || !window.MemoryPage || !window.TaskPage || !window.MobileRoster){
+    return setTimeout(boot, 40);
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+}
+boot();
+</script>
+</body>
+</html>
