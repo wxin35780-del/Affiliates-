@@ -9,6 +9,7 @@ import Anthropic from '@anthropic-ai/sdk';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 const PORT = process.env.PORT || 3001;
+const distDir = path.join(ROOT, 'dist');
 
 const app = express();
 app.use(cors());
@@ -44,7 +45,7 @@ function buildUserMessage({ stepLabel, campaignTitle, product, previousOutputs }
 
 /* ---- Health check ---- */
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, hasKey: !!process.env.ANTHROPIC_API_KEY });
+  res.json({ ok: true, hasKey: !!process.env.ANTHROPIC_API_KEY, distExists: fs.existsSync(distDir), distDir, __dirname });
 });
 
 /* ---- Run a campaign step (SSE stream) ---- */
@@ -90,6 +91,10 @@ app.post('/api/run-step', async (req, res) => {
 
   res.end();
 });
+
+// Serve built React frontend
+app.use(express.static(distDir));
+app.use((_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 
 app.listen(PORT, () => {
   const keyStatus = process.env.ANTHROPIC_API_KEY ? '✓ พร้อมใช้งาน' : '✗ ยังไม่ได้ตั้งค่า (เพิ่ม ANTHROPIC_API_KEY ใน .env)';
