@@ -72,8 +72,9 @@ app.post('/api/run-step', async (req, res) => {
     const systemPrompt = loadPrompt(agentId);
     const userMessage = buildUserMessage({ stepLabel, campaignTitle, product, previousOutputs });
 
+    const model = agentId === 'marshal' ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
     const stream = client.messages.stream({
-      model: 'claude-opus-4-8',
+      model,
       max_tokens: 3000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
