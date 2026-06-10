@@ -97,14 +97,21 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [assigning, setAssigning] = useState(null);
   const [campaignModal, setCampaignModal] = useState(false);
-  const [campaigns, setCampaigns] = useState(()=> loadCampaigns());
+  const [campaigns, setCampaigns] = useState([]);
   const [toast, setToast] = useState(null);
 
   const width = useWindowWidth();
   const isMobile = width < 768;
 
   useEffect(()=>{ saveAgents(agents); }, [agents]);
-  useEffect(()=>{ saveCampaigns(campaigns); }, [campaigns]);
+
+  // Load campaigns from server on mount
+  useEffect(() => {
+    fetch('/api/campaigns')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setCampaigns(data); })
+      .catch(() => setCampaigns(loadCampaigns())); // fallback to localStorage
+  }, []);
   useEffect(()=>{ if(toast){ const t=setTimeout(()=>setToast(null), 2600); return ()=>clearTimeout(t); } }, [toast]);
 
   // Close modals on Escape
@@ -132,40 +139,49 @@ export default function App() {
   const saveAgent = (a)=>{ setAgents(prev=>prev.map(x=>x.id===a.id?a:x)); setEditing(null); setToast(`บันทึกประวัติ "${a.alias}" แล้ว`); };
   const deleteAgent = (id)=>{ const left = agents.filter(x=>x.id!==id); setAgents(left); setEditing(null); if(selId===id) setSelId((left[0]||{}).id); setToast('ปลดจอมยุทธออกจากสังกัดแล้ว'); go('roster'); };
   const assignAgent = (a)=>{ setAgents(prev=>prev.map(x=>x.id===a.id?a:x)); setAssigning(null); setToast(`ส่งบัญชา "${a.alias}" · ${STATUS[a.status].th} แล้ว`); };
-  const addCampaign = (form) => {
+  const syncCampaign = async (updated) => {
+    setCampaigns(prev => prev.map(c => c.id === updated.id ? updated : c));
+    await fetch(`/api/campaigns/${updated.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated),
+    }).catch(() => {});
+  };
+
+  const addCampaign = async (form) => {
     const c = makeCampaign(form, agents);
     setCampaigns(prev => [c, ...prev]);
     setCampaignModal(false);
     setToast(`เปิดศึก "${c.title}" แล้ว`);
     go('task');
+    await fetch('/api/campaigns', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c),
+    }).catch(() => {});
   };
+
   const advanceStep = (campaignId, fullOutput = null) => {
     const camp = campaigns.find(c => c.id === campaignId);
     const activeIdx = camp?.steps.findIndex(s => s.state === 'active') ?? -1;
     const activeStep = camp?.steps[activeIdx];
     const nextStep = camp?.steps[activeIdx + 1];
-    setCampaigns(prev => prev.map(c => {
-      if (c.id !== campaignId) return c;
-      const steps = c.steps.map((s, i) => {
-        if (i === activeIdx) return { ...s, state: 'done', ...(fullOutput ? { fullOutput } : {}) };
-        if (i === activeIdx + 1) return { ...s, state: 'active' };
-        return s;
-      });
-      const allDone = steps.every(s => s.state === 'done');
-      return { ...c, steps, status: allDone ? 'done' : 'active' };
-    }));
+    const steps = camp.steps.map((s, i) => {
+      if (i === activeIdx) return { ...s, state: 'done', ...(fullOutput ? { fullOutput } : {}) };
+      if (i === activeIdx + 1) return { ...s, state: 'active' };
+      return s;
+    });
+    const allDone = steps.every(s => s.state === 'done');
+    const updated = { ...camp, steps, status: allDone ? 'done' : 'active' };
+    syncCampaign(updated);
     if (activeStep) setToast(nextStep ? `✓ "${activeStep.label}" เสร็จแล้ว → ${nextStep.label}` : `⚔ ศึก "${camp.title}" สำเร็จ!`);
   };
+
   const rerunStep = (campaignId, stepIdx) => {
-    setCampaigns(prev => prev.map(c => {
-      if (c.id !== campaignId) return c;
-      const steps = c.steps.map((s, i) => {
-        if (i === stepIdx) return { ...s, state: 'active', fullOutput: null };
-        if (i > stepIdx) return { ...s, state: 'queued' };
-        return s;
-      });
-      return { ...c, steps, status: 'active' };
-    }));
+    const camp = campaigns.find(c => c.id === campaignId);
+    const steps = camp.steps.map((s, i) => {
+      if (i === stepIdx) return { ...s, state: 'active', fullOutput: null };
+      if (i > stepIdx) return { ...s, state: 'queued' };
+      return s;
+    });
+    const updated = { ...camp, steps, status: 'active' };
+    syncCampaign(updated);
     setToast('รีเซ็ตด่านเพื่อรันใหม่แล้ว');
   };
   const reset = ()=>{ const base = resetAgents(); const camps = resetCampaigns(); setAgents(base); setCampaigns(camps); setSelId(base[0].id); setToast('คืนค่าทำเนียบเป็นค่าตั้งต้นแล้ว'); go('roster'); };
