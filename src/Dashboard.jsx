@@ -238,6 +238,37 @@ function AgentStreamPanel({ text, done, error }) {
   );
 }
 
+function CopyBtn({ text }) {
+  const [copied, setCopied] = React.useState(false);
+  const handle = () => {
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); });
+  };
+  return (
+    <button onClick={handle} style={{ padding:'5px 12px', borderRadius:5, fontSize:11.5, cursor:'pointer',
+      border:'1px solid var(--ink-line)', background: copied ? 'rgba(111,155,106,.18)' : 'var(--ink-2)',
+      color: copied ? 'var(--st-active)' : 'var(--tx-dim)', fontFamily:'var(--font-body)', transition:'all .15s' }}>
+      {copied ? '✓ คัดลอกแล้ว' : '📋 คัดลอก'}
+    </button>
+  );
+}
+
+function DownloadBtn({ text, filename }) {
+  const handle = () => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <button onClick={handle} style={{ padding:'5px 12px', borderRadius:5, fontSize:11.5, cursor:'pointer',
+      border:'1px solid var(--ink-line)', background:'var(--ink-2)',
+      color:'var(--tx-dim)', fontFamily:'var(--font-body)' }}>
+      ⬇ ดาวน์โหลด .txt
+    </button>
+  );
+}
+
 function EmptyTaskView({ onNew }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
@@ -435,15 +466,21 @@ export function TaskView({ agents, onOpen, campaigns=[], onNewCampaign, onAdvanc
                       {step.state==='done' && (step.fullOutput || step.out!=='—') && (
                         <div style={{ marginTop:10 }} onClick={e => e.stopPropagation()}>
                           {step.fullOutput ? (
-                            <details open style={{ cursor:'pointer' }}>
-                              <summary style={{ fontSize:12, color:'var(--gold-hi)', fontFamily:'var(--font-mono)', listStyle:'none', userSelect:'none' }}>
-                                ✓ ผลลัพธ์ Agent ▾
-                              </summary>
-                              <div style={{ marginTop:8, fontFamily:'var(--font-mono)', fontSize:11, color:'var(--tx-dim)',
-                                lineHeight:1.6, whiteSpace:'pre-wrap', maxHeight:180, overflowY:'auto',
-                                background:'#090704', padding:'10px 12px', borderRadius:4, border:'1px solid var(--ink-line)' }}
-                                className="jh-scroll">{step.fullOutput}</div>
-                            </details>
+                            <>
+                              <details open style={{ cursor:'pointer' }}>
+                                <summary style={{ fontSize:12, color:'var(--gold-hi)', fontFamily:'var(--font-mono)', listStyle:'none', userSelect:'none' }}>
+                                  ✓ ผลลัพธ์ Agent ▾
+                                </summary>
+                                <div style={{ marginTop:8, fontFamily:'var(--font-mono)', fontSize:11, color:'var(--tx-dim)',
+                                  lineHeight:1.6, whiteSpace:'pre-wrap', maxHeight:180, overflowY:'auto',
+                                  background:'#090704', padding:'10px 12px', borderRadius:4, border:'1px solid var(--ink-line)' }}
+                                  className="jh-scroll">{step.fullOutput}</div>
+                              </details>
+                              <div style={{ display:'flex', gap:7, marginTop:8 }}>
+                                <CopyBtn text={step.fullOutput} />
+                                <DownloadBtn text={step.fullOutput} filename={`${step.label}.txt`} />
+                              </div>
+                            </>
                           ) : (
                             <div style={{ fontSize:12, color:'var(--tx-faint)' }}>
                               ผลลัพธ์: <span style={{ color:'var(--gold-hi)', fontFamily:'var(--font-mono)' }}>{step.out}</span>
