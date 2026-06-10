@@ -281,7 +281,7 @@ function EmptyTaskView({ onNew }) {
   );
 }
 
-export function TaskView({ agents, onOpen, campaigns=[], onNewCampaign, onAdvanceStep, isMobile }) {
+export function TaskView({ agents, onOpen, campaigns=[], onNewCampaign, onAdvanceStep, onRerunStep, isMobile }) {
   const find = id => agents.find(a=>a.id===id) || AGENTS.find(a=>a.id===id);
   const { progress } = useLiveData(agents);
   const liveLog = useLiveLog();
@@ -463,6 +463,15 @@ export function TaskView({ agents, onOpen, campaigns=[], onNewCampaign, onAdvanc
                           </div>
                         );
                       })()}
+                      {step.state==='done' && !step.fullOutput && step.out==='—' && onRerunStep && (
+                        <div style={{ marginTop:8 }} onClick={e => e.stopPropagation()}>
+                          <button onClick={()=>onRerunStep(campaign.id, idx)} style={{
+                            padding:'5px 14px', borderRadius:5, fontSize:12, cursor:'pointer',
+                            border:'1px solid var(--cinnabar-hi)', background:'rgba(180,60,40,.1)',
+                            color:'var(--cinnabar-hi)', fontFamily:'var(--font-body)',
+                          }}>🔄 รันใหม่</button>
+                        </div>
+                      )}
                       {step.state==='done' && (step.fullOutput || step.out!=='—') && (
                         <div style={{ marginTop:10 }} onClick={e => e.stopPropagation()}>
                           {step.fullOutput ? (

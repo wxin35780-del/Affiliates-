@@ -156,6 +156,18 @@ export default function App() {
     }));
     if (activeStep) setToast(nextStep ? `✓ "${activeStep.label}" เสร็จแล้ว → ${nextStep.label}` : `⚔ ศึก "${camp.title}" สำเร็จ!`);
   };
+  const rerunStep = (campaignId, stepIdx) => {
+    setCampaigns(prev => prev.map(c => {
+      if (c.id !== campaignId) return c;
+      const steps = c.steps.map((s, i) => {
+        if (i === stepIdx) return { ...s, state: 'active', fullOutput: null };
+        if (i > stepIdx) return { ...s, state: 'queued' };
+        return s;
+      });
+      return { ...c, steps, status: 'active' };
+    }));
+    setToast('รีเซ็ตด่านเพื่อรันใหม่แล้ว');
+  };
   const reset = ()=>{ const base = resetAgents(); const camps = resetCampaigns(); setAgents(base); setCampaigns(camps); setSelId(base[0].id); setToast('คืนค่าทำเนียบเป็นค่าตั้งต้นแล้ว'); go('roster'); };
 
   const cur = agents.find(a=>a.id===view.agentId);
@@ -165,7 +177,7 @@ export default function App() {
     <>
       {view.name==='roster' && <RosterView agents={agents} selId={selId} setSelId={setSelId} onOpen={openProfile} onAdd={()=>setModal(true)} onNewCampaign={()=>setCampaignModal(true)} isMobile={isMobile} />}
       {view.name==='dashboard' && <DashboardView agents={agents} onOpen={openProfile} onAssign={(a)=>setAssigning(a)} campaigns={campaigns} onNewCampaign={()=>setCampaignModal(true)} isMobile={isMobile} />}
-      {view.name==='task' && <TaskView agents={agents} onOpen={openProfile} campaigns={campaigns} onNewCampaign={()=>setCampaignModal(true)} onAdvanceStep={advanceStep} isMobile={isMobile} />}
+      {view.name==='task' && <TaskView agents={agents} onOpen={openProfile} campaigns={campaigns} onNewCampaign={()=>setCampaignModal(true)} onAdvanceStep={advanceStep} onRerunStep={rerunStep} isMobile={isMobile} />}
       {view.name==='profile' && cur && <ProfileView agent={cur} tab={tab} setTab={setTab} onBack={()=>go('roster')} onEdit={(a)=>setEditing(a)} onAssign={(a)=>setAssigning(a)} isMobile={isMobile} />}
       {view.name==='profile' && !cur && <div style={{ padding:60, color:'var(--tx-faint)' }}>ไม่พบจอมยุทธผู้นี้</div>}
     </>
