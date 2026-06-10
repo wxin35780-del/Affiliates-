@@ -68,7 +68,7 @@ export function Portrait({ glyph='俠', accent='var(--gold)', label='ภาพ�
         onDragOver={e=>{ e.preventDefault(); setDragging(true); }}
         onDragLeave={()=>setDragging(false)}
         onDrop={handleDrop}>
-        <img src={imgSrc} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+        <img src={imgSrc} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', display:'block' }} />
         <div style={{ position:'absolute', inset:0, opacity:dragging?1:0, transition:'opacity .15s',
           display:'flex', alignItems:'center', justifyContent:'center',
           background:'rgba(0,0,0,.55)', color:'var(--gold)', fontSize:12 }}>
