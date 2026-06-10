@@ -433,11 +433,11 @@ export function TaskView({ agents, onOpen, campaigns=[], onNewCampaign, onAdvanc
                         );
                       })()}
                       {step.state==='done' && (step.fullOutput || step.out!=='—') && (
-                        <div style={{ marginTop:10 }}>
+                        <div style={{ marginTop:10 }} onClick={e => e.stopPropagation()}>
                           {step.fullOutput ? (
-                            <details style={{ cursor:'pointer' }}>
+                            <details open style={{ cursor:'pointer' }}>
                               <summary style={{ fontSize:12, color:'var(--gold-hi)', fontFamily:'var(--font-mono)', listStyle:'none', userSelect:'none' }}>
-                                ✓ ดูผลลัพธ์ Agent ▾
+                                ✓ ผลลัพธ์ Agent ▾
                               </summary>
                               <div style={{ marginTop:8, fontFamily:'var(--font-mono)', fontSize:11, color:'var(--tx-dim)',
                                 lineHeight:1.6, whiteSpace:'pre-wrap', maxHeight:180, overflowY:'auto',

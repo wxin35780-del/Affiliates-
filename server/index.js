@@ -59,9 +59,13 @@ app.post('/api/run-step', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
-  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+  const send = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+    if (typeof res.flush === 'function') res.flush();
+  };
 
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -75,12 +79,9 @@ app.post('/api/run-step', async (req, res) => {
       messages: [{ role: 'user', content: userMessage }],
     });
 
-    for await (const event of stream) {
-      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-        send({ text: event.delta.text });
-      }
-    }
+    stream.on('text', (text) => send({ text }));
 
+    await stream.finalMessage();
     send({ done: true });
   } catch (err) {
     send({ error: err.message || String(err) });
@@ -88,13 +89,6 @@ app.post('/api/run-step', async (req, res) => {
 
   res.end();
 });
-
-// Serve built React frontend (production)
-const distDir = path.join(ROOT, 'dist');
-if (fs.existsSync(distDir)) {
-  app.use(express.static(distDir));
-  app.use((_req, res) => res.sendFile(path.join(distDir, 'index.html')));
-}
 
 app.listen(PORT, () => {
   const keyStatus = process.env.ANTHROPIC_API_KEY ? '✓ พร้อมใช้งาน' : '✗ ยังไม่ได้ตั้งค่า (เพิ่ม ANTHROPIC_API_KEY ใน .env)';
